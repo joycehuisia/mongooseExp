@@ -13,6 +13,13 @@ module.exports = Object.freeze({
         ADMIN: "ADMIN", 
         SUPERUSER: "SUPERUSER"
     },
+    currency: {
+        HKD: "HKD",
+        USD: "USD",
+        CNY: "RMB",
+        JPY: "JPY",
+        KRW: "KRW"
+    },
     questionTypes: {
         ESSAY: "ESSAY",
         MULTIPLE_CHOICE: "MULTIPLECHOICE",

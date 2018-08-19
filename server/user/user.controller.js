@@ -28,18 +28,26 @@ function get(req, res) {
 function create(username, password, userType) {
     let type,
         userTypes = constants.userTypes,
-        user;
+        userObject;
 
     if(!userTypes) {
         return Promise.reject({
             error: "No user type found"
-        })
+        });
     }
 
-    return User.createUser(username, password)
+    return User.getByUsername(username)
         .then((response) => {
+            if(response) {
+                return Promise.reject({
+                    error: "This username is no longer available. Please select another username and try again"
+                });
+            }
+
+            return User.createUser(username, password, userType);
+        }).then((response) => {
             //TODO: make proper responses
-            user = response;
+            userObject = response;
             switch(userType) {
                 case userTypes.STUDENT:
                     type = Student;
@@ -56,11 +64,12 @@ function create(username, password, userType) {
                 default:
                     break;
             }
-            console.log(response);
-            return type.create(response.id);
-        }).then((subUser) => {
-            console.log(subUser);
-            return subUser;
+
+            return type.create(userObject.id);
+        }).then((user) => {
+            var newObject = {...user.toObject(), ...userObject};
+            delete newObject.id; //remove the id from the userObject model as we are only using the one from the submodel
+            return newObject;
         });
 }
 

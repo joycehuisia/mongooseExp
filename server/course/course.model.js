@@ -1,17 +1,32 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 const constants = require('../constant/constant');
 
 /**
- * User Schema
+ * Course Schema
  */
 const CourseSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true
     },
+    price: [{
+        curr: {
+            type: String,
+            enum: Object.values(constants.currency)
+        },
+        amount: {
+            type: Number,
+            required: true
+        }
+    }],
     classes: [{
         type: Schema.ObjectId,
         ref: 'Class'
+    }],
+    students: [{
+        type: Schema.ObjectId,
+        ref: 'Student'
     }]
 });
 
@@ -22,39 +37,40 @@ CourseSchema.methods = {
 
     getName() {
         return this.name;
+    },
+
+    addStudents(studentId) {
+        this.students.push(...studentId);
+        return this.save({
+            students: this.students
+        });
     }
 }
 
 CourseSchema.statics = {
 
-    list({
-        sortOption = 0,
-        sortDirection = 1,
-        limit = 50
-    } = {}) {
+    createNewCourse(name, price) {
+        let course = new this({
+            name: name,
+            price: price
+        });
 
-        let sortParams = {};
-
-        switch(sortOption) {
-            case constants.sortOptions.TITLE:
-                sortParams.name = sortDirection;
-                break;
-            case constants.sortOptions.ID:
-            default:
-                break;
-        }
-
-        return this.find()
-            .sort(sortParams)
-            .limit(+limit)
-            .exec();
-
+        return course.save();
     },
 
     getCourseById(courseId) {
         return this.find({
             _id: courseId
         }).exec();
+    },
+
+    
+    list({
+        limit = 50
+    } = {}) {
+        return this.find()
+            .limit(+limit)
+            .exec();
     }
 }
 

@@ -19,10 +19,12 @@ const UserSchema = new mongoose.Schema({
         required: true
     },
     salt: {
-        type: String
+        type: String,
+        select: false
     },
     hash: {
-        type: String
+        type: String,
+        select: false
     },
     mobileNumber: {
         type: String,
@@ -35,14 +37,14 @@ const UserSchema = new mongoose.Schema({
     },
     locked: {
         type: Boolean,
-        default: false
+        default: false,
+        select: false
     },
     loginAttempts: {
         type: Number,
-        default: 0
+        default: 0,
+        select: false
     }
-}, {
-    discriminatorKey: 'user'
 });
 
 /**
@@ -92,7 +94,6 @@ UserSchema.methods = {
             loginAttempts: 0,
             locked: false
         }).then((error) => { //Will only need error message if failed to unlock
-            console.log(this.locked);
             if(this.locked === false) {
                 return true;
             }
@@ -106,15 +107,24 @@ UserSchema.methods = {
  * Statics
  */
 UserSchema.statics = {
-
-    createUser(username, password) {
+    createUser(username, password, type) {
         let user = new this({
-            username: username
+            username: username,
+            userType: type
         });
 
         user.setPassword(password);
 
-        return user.save();
+        return user.save()
+            .then((user) => {
+                return {
+                    id: user.id,
+                    createdAt: user.createdAt,
+                    userType: user.userType,
+                    username: user.username,
+                    mobileNumber: user.mobileNumber
+                }
+            });
     },
 
     getByUsername(username) {
