@@ -53,4 +53,4 @@ HandOutSchema.methods = {
 /**
  * @typedef Test
  */
-module.exports = mongoose.model('Quiz', HandOutSchema);
+module.exports = mongoose.model('Handout', HandOutSchema);

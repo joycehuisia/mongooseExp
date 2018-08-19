@@ -88,10 +88,16 @@ UserSchema.methods = {
     },
 
     unlock() {
-        console.log("in unlock");
         return this.save({
             loginAttempts: 0,
             locked: false
+        }).then((error) => { //Will only need error message if failed to unlock
+            console.log(this.locked);
+            if(this.locked === false) {
+                return true;
+            }
+            //TODO: system log the error
+            return false;
         });
     }
 }

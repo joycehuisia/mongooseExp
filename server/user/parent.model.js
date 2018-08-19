@@ -1,9 +1,11 @@
 const mongoose = require('mongoose'),
-    extend = require('mongoose-schema-extend'),
-    Schema = mongoose.Schema,
-    User = require('./user.model.js');
+    Schema = mongoose.Schema;
 
-const ParentSchema = User.extend({
+const ParentSchema =  new mongoose.Schema({
+    userId: {
+        type: Schema.ObjectId,
+        ref: 'User'
+    },
     children: [{
         type: Schema.ObjectId,
         ref: 'Student'
@@ -11,4 +13,30 @@ const ParentSchema = User.extend({
     name: String
 });
 
-module.export = mongoose.model('Parent', ParentSchema);
+ParentSchema.methods = {
+    addChild(childId) {
+        this.children.push(childId);
+        return this.save({
+            children: this.children
+        });
+    },
+
+    removeChild(childId) {
+        this.children.splice(this.children.indexOf(childId));
+        return this.save({
+            children: this.children
+        });
+    }
+}
+
+ParentSchema.statics = {
+    create(userId) {
+        let parent = new this({
+            userId: userId
+        });
+
+        return parent.save();
+    }
+}
+
+module.exports = mongoose.model('Parent', ParentSchema);

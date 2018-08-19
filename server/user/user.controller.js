@@ -1,4 +1,9 @@
 const User = require('./user.model');
+const Student = require('./student.model');
+const Teacher = require('./teacher.model');
+const Admin = require('./admin.model');
+const Parent = require('./parent.model');
+const constants = require('../constant/constant');
 
 /**
  * Load user and append to req.
@@ -20,11 +25,42 @@ function get(req, res) {
     return res.json(req.user);
 }
 
-function create(username, password) {
+function create(username, password, userType) {
+    let type,
+        userTypes = constants.userTypes,
+        user;
+
+    if(!userTypes) {
+        return Promise.reject({
+            error: "No user type found"
+        })
+    }
+
     return User.createUser(username, password)
         .then((response) => {
             //TODO: make proper responses
-            return response;
+            user = response;
+            switch(userType) {
+                case userTypes.STUDENT:
+                    type = Student;
+                    break
+                case userTypes.TEACHER:
+                    type = Teacher;
+                    break;
+                case userTypes.PARENT:
+                    type = Parent;
+                    break;
+                case userTypes.ADMIN:
+                    type = Admin;
+                    break;
+                default:
+                    break;
+            }
+            console.log(response);
+            return type.create(response.id);
+        }).then((subUser) => {
+            console.log(subUser);
+            return subUser;
         });
 }
 
@@ -74,8 +110,6 @@ function remove(req, res, next) {
 }
 
 function getUserByUsername(req, res) {
-    console.log(req.query);
-
     if (req.query.username) {
         User.getByUsername(req.query.username)
             .then(function(user) {
@@ -97,6 +131,12 @@ function getUserByUsername(req, res) {
     }
 }
 
+function unlock(username) {
+    return User.findOne({username: username})
+        .then((user) => {
+            return user.unlock();
+        });
+}
 
 module.exports = {
     load,
@@ -105,5 +145,6 @@ module.exports = {
     update,
     list,
     remove,
-    getUserByUsername
+    getUserByUsername,
+    unlock
 };

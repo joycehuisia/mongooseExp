@@ -1,29 +1,42 @@
 const mongoose = require('mongoose'),
-    extend = require('mongoose-schema-extend'),
-    Schema = mongoose.Schema,
-    User = require('./user.model.js');
+    Schema = mongoose.Schema;
 
-const TeacherSchema = User.extend({
+const TeacherSchema = new mongoose.Schema({
+    userId: {
+        type: Schema.ObjectId,
+        ref: 'User',
+        required: true
+    },
     classes: [{
         type: Schema.ObjectId,
         ref: 'Class'
-    }],
-    students: [{
-        type: Schema.ObjectId,
-        ref: 'Student'
-    }]
-    schedule: [{
-        class: {
-            type: Schema.ObjectId,
-            ref: 'Class'
-        },
-        date: {
-            type: Date
-        },
-        time: {
-            type: String
-        }
     }]
 });
 
-module.export = mongoose.model('Teacher', TeacherSchema);
+TeacherSchema.methods = {
+    addClass(classId) {
+        this.classes.push(classId);
+        return this.save({
+            classes: this.classes
+        });
+    },
+
+    removeClass(classId) {
+        this.classes.splice(this.classes.indexOf(classId));
+        return this.save({
+            classes: this.classes
+        });
+    }
+}
+
+TeacherSchema.statics = {
+    create(userId) {
+        let teacher = new this({
+            userId: userId
+        });
+
+        return teacher.save();
+    }
+}
+
+module.exports = mongoose.model('Teacher', TeacherSchema);

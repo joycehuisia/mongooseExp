@@ -51,10 +51,8 @@ function login(username, password) {
             }
 
             if(user.verifyPassword(password)) {
-                return user.unlock()
-                    .then(function(user) {
-                        return user;
-                    });
+                user.unlock();
+                return user;
             }
 
             return user.incrementLock()

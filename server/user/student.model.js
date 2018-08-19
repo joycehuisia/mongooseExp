@@ -3,11 +3,45 @@ const mongoose = require('mongoose'),
     Schema = mongoose.Schema,
     User = require('./user.model.js');
 
-const StudentSchema = User.extend({
-    scores: [{
-        type: Number
+const StudentSchema = new mongoose.Schema({
+    userId: {
+        type: Schema.ObjectId,
+        ref: 'User'
+    },
+    classes: [{
+        type: Schema.ObjectId,
+        ref: 'Class'
     }],
-    className: String
+    courses: [{
+        type: Schema.ObjectId,
+        ref: 'Course'
+    }]
 });
 
-module.export = mongoose.model('Student', StudentSchema);
+StudentSchema.methods = {
+    addClass(classId) {
+        this.classes.push(classId);
+        return this.save({
+            classes: this.classes
+        });
+    },
+
+    removeClass(classId) {
+        this.classes.splice(this.classes.indexOf(classId));
+        return this.save({
+            classes: this.classes
+        });
+    }
+}
+
+StudentSchema.statics = {
+    create(userId) {
+        let student = new this({
+            userId: userId
+        });
+
+        return student.save();
+    }
+}
+
+module.exports = mongoose.model('Student', StudentSchema);
