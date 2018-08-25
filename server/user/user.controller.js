@@ -25,10 +25,15 @@ function get(req, res) {
     return res.json(req.user);
 }
 
-function create(username, password, userType) {
+function getAllStudents() {
+    return Student.find();
+}
+
+function create(username, password, firstName, lastName, userType) {
     let type,
         userTypes = constants.userTypes,
-        userObject;
+        userObject,
+        typeObject;
 
     if(!userTypes) {
         return Promise.reject({
@@ -38,13 +43,14 @@ function create(username, password, userType) {
 
     return User.getByUsername(username)
         .then((response) => {
-            if(response) {
+            //if(response) {
+            if(false) {
                 return Promise.reject({
                     error: "This username is no longer available. Please select another username and try again"
                 });
             }
 
-            return User.createUser(username, password, userType);
+            return User.createUser(username, password, firstName, lastName, userType);
         }).then((response) => {
             //TODO: make proper responses
             userObject = response;
@@ -67,7 +73,10 @@ function create(username, password, userType) {
 
             return type.create(userObject.id);
         }).then((user) => {
-            var newObject = {...user.toObject(), ...userObject};
+            typeObject = user;
+            return userObject.setReference(user.id);
+        }).then((response) => {
+            var newObject = {...typeObject.toObject(), ...userObject.toObject()};
             delete newObject.id; //remove the id from the userObject model as we are only using the one from the submodel
             return newObject;
         });
@@ -154,6 +163,7 @@ module.exports = {
     update,
     list,
     remove,
+    getAllStudents,
     getUserByUsername,
     unlock
 };

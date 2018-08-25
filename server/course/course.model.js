@@ -25,8 +25,18 @@ const CourseSchema = new mongoose.Schema({
         ref: 'Class'
     }],
     students: [{
-        type: Schema.ObjectId,
-        ref: 'Student'
+        id: {
+            type: Schema.ObjectId,
+            ref: 'Student'
+        },
+        firstName: {
+            type: String,
+            required: true
+        },
+        lastName: {
+            type: String,
+            required: true
+        }
     }]
 });
 
@@ -40,10 +50,18 @@ CourseSchema.methods = {
     },
 
     addStudents(studentId) {
-        this.students.push(...studentId);
-        return this.save({
-            students: this.students
-        });
+        let students = [];
+        for(var i = 0; i < studentId.length; i++) {
+            students.push({
+                id: studentId[0]
+            });
+        }
+        var params = {
+            $push: {
+                students: students
+            }
+        }
+        return this.update(params);
     }
 }
 

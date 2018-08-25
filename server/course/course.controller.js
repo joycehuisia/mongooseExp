@@ -1,6 +1,8 @@
 const Promise = require('bluebird');
 const Course = require('./course.model');
 const Student = require('../user/student.model');
+const User = require('../user/user.model');
+const mongoose = require('mongoose');
 
 
 function createNewCourse(courseName, coursePrice) {
@@ -9,31 +11,34 @@ function createNewCourse(courseName, coursePrice) {
 }
 
 function addStudentToCourse(courseId, studentList) {
+
+    let students = [],
+        users = [],
+        courseObject;
+
+
     return Course.findOne({
             _id: courseId
         })
         .then((course) => {
-            console.log("studentList");
-            return Student.find({
-                'userId': {
+            courseObject = course;
+            return course.addStudents(studentList);
+        }).then((response) => {
+            let query = {
+                _id: {
                     $in: studentList
                 }
-            }).then((response) => {
-                //TODO: Temporary until mongoose can be fine tuned to only return userId
-                var arr = [];
-                for(i = 0; i < response.length; i++) {
-                    arr.push(response[0].userId);
+            }, params = {
+                $push: {
+                    courses: [{
+                        id: courseObject.id
+                    }]
                 }
-                var notfound = studentList.filter(function(i) {
-                    return studentList.indexOf(i) < 0
-                });
-
-                //Continue on this
-            }).catch((response) => {
-                console.log(response);
-                return Promise.reject(response);
-            });
-
+            };
+            return Student.update(query, params);
+        }).then((response) => {
+            //return proper response
+            return response;
         }).catch((error) => {
             return Promise.reject({
                 error: "The selected course does not exist."
@@ -42,11 +47,15 @@ function addStudentToCourse(courseId, studentList) {
 }
 
 function getCourseById(courseId) {
-
+    return Course.findOne({
+        id: courseId
+    });
 }
 
 function getCourseByName(courseName) {
-
+    return Course.find({
+        name: courseName
+    });
 }
 
 function getAllCourses() {

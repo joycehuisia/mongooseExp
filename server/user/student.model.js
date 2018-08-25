@@ -13,8 +13,10 @@ const StudentSchema = new mongoose.Schema({
         ref: 'Class'
     }],
     courses: [{
-        type: Schema.ObjectId,
-        ref: 'Course'
+        id: {
+            type: Schema.Types.ObjectId,
+            ref: 'Course'
+        }
     }]
 });
 

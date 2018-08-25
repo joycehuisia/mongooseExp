@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const mongoose = require('mongoose');
 const httpStatus = require('http-status');
 const APIError = require('../helpers/APIError');
+const Schema = mongoose.Schema;
 const constants = require('../constant/constant');
 
 /**
@@ -17,6 +18,10 @@ const UserSchema = new mongoose.Schema({
     username: {
         type: String,
         required: true
+    },
+    //The ID reference that points the user to their associated sub-model (Student, Teacher, Admin, Parent)
+    userRef: {
+        type: Schema.Types.ObjectId
     },
     salt: {
         type: String,
@@ -44,6 +49,14 @@ const UserSchema = new mongoose.Schema({
         type: Number,
         default: 0,
         select: false
+    },
+    firstName: {
+        type: String,
+        required: true
+    },
+    lastName: {
+        type: String,
+        required: true
     }
 });
 
@@ -84,16 +97,25 @@ UserSchema.methods = {
         this.hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, "sha512").toString('hex');
     },
 
+    setReference(objectId) {
+        this.userRef = objectId;
+
+        return this.save()
+        .then((response) => {
+            return response;
+        });
+    },
+
     verifyPassword(password) {
         var hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, "sha512").toString('hex');
         return this.hash === hash;
     },
 
     unlock() {
-        return this.save({
-            loginAttempts: 0,
-            locked: false
-        }).then((error) => { //Will only need error message if failed to unlock
+        this.loginAttempts = 0;
+        this.locked = false;
+        return this.save()
+        .then((error) => { //Will only need error message if failed to unlock
             if(this.locked === false) {
                 return true;
             }
@@ -107,23 +129,27 @@ UserSchema.methods = {
  * Statics
  */
 UserSchema.statics = {
-    createUser(username, password, type) {
+    createUser(username, password, firstName, lastName, type) {
         let user = new this({
             username: username,
-            userType: type
+            userType: type,
+            firstName: firstName,
+            lastName: lastName
         });
 
         user.setPassword(password);
 
         return user.save()
             .then((user) => {
-                return {
-                    id: user.id,
-                    createdAt: user.createdAt,
-                    userType: user.userType,
-                    username: user.username,
-                    mobileNumber: user.mobileNumber
-                }
+                return this.findById(user.id, {
+                    "salt": 0,
+                    "hash": 0,
+                    "locked": 0,
+                    "loginAttempts": 0
+                });
+                /*
+                
+                */
             });
     },
 

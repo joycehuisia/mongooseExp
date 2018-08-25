@@ -10,7 +10,7 @@ const router = express.Router(); // eslint-disable-line new-cap
 router.route('/create')
     //.get(userCtrl.list)
     .post(validate(paramValidation.createUser), (req, res) => {
-        userCtrl.create(req.body.username, req.body.password, req.body.userType)
+        userCtrl.create(req.body.username, req.body.password, req.body.firstName, req.body.lastName, req.body.userType)
             .then(function(response) {
                 res.status(200).json(response);
             })
@@ -31,6 +31,14 @@ router.route('/unlock')
 
 router.route('/getUserByUsername')
     .get(userCtrl.getUserByUsername);
+
+router.route('/getAllStudents')
+    .get((req, res) => {
+        userCtrl.getAllStudents()
+            .then((response) => {
+                res.json(response)
+            });
+    });
 
 router.route('/:userId')
     /** GET /api/users/:userId - Get user */

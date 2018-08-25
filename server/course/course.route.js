@@ -1,3 +1,4 @@
+const Promise = require('bluebird');
 const express = require('express');
 const validate = require('express-validation');
 const paramValidation = require('../../config/param-validation');
@@ -20,6 +21,9 @@ router.route('/addStudentToCourse')
     .get((req, res) => {
         courseCtrl.addStudentToCourse(req.query.courseId, req.query.studentId.split([',']))
             .then((response) => {
+                if(response.error) {
+                    return Promise.reject(response.response);
+                }
                 res.status(200).json(response);
             }).catch((response) => {
                 res.status(400).json(response);

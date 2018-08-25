@@ -20,7 +20,7 @@ RUN yarn --pure-lockfile
 COPY . /app/
 
 # expose port 4040
-EXPOSE 4040
+EXPOSE 4000
 
 # cmd to start service
 CMD [ "yarn", "start" ]
