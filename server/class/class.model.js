@@ -4,12 +4,8 @@ const mongoose = require('mongoose'),
     constants = require('../constant/constant');
 
 const ClassSchema = new Schema({
-    students: [{
-        type: Schema.ObjectId,
-        ref: 'student'
-    }],
     teacher: {
-        type: Schema.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'teacher'
     },
     name: {
@@ -22,14 +18,31 @@ const ClassSchema = new Schema({
         type: Schema.Types.Mixed
     },
     materials: [{
-        type: Schema.ObjectId,
-        ref: 'baseMaterial.materialType'
+        id: {
+            type: Schema.Types.ObjectId
+        },
+        type: {
+            type: String,
+            ref: 'baseMaterial.materialType'
+        }
     }],
     subject: [{
         type: String,
         enum: Object.values(constants.subjects)
+    }],
+    courses: [{
+        id: {
+            type: Schema.Types.ObjectId,
+            ref: 'Course'
+        }
     }]
 });
+
+ClassSchema.methods = {
+    addMaterial(materialId) {
+
+    }
+}
 
 ClassSchema.statics = {
     getAllClasses() {
@@ -60,6 +73,21 @@ ClassSchema.statics = {
         return this.find({
             subject: typeName
         }).exec();
+    },
+
+    addCourseToClass(classList, courseId) {
+        let query = {
+            _id: {
+                $in: classList
+            }
+        }, params = {
+            $push: {
+                courses: [{
+                    id: courseObject.id
+                }]
+            }
+        };
+        return this.update(query, params);
     }
 
 }

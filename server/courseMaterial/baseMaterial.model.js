@@ -7,7 +7,7 @@ const constants = require('../constant/constant');
  */
 const baseSchema = new mongoose.Schema({
     student: [{
-        type: Schema.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'Student'
     }],
     materialType: {

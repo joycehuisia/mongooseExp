@@ -30,6 +30,19 @@ router.route('/addStudentToCourse')
             });
     });
 
+router.route('/addClassToCourse')
+    .get((req, res) => {
+        courseCtrl.addClassesToCourse(req.query.courseId, req.query.classesId.split([',']))
+            .then((response) => {
+                if(response.error) {
+                    return Promise.reject(response.response);
+                }
+                res.status(200).json(response);
+            }).catch((response) => {
+                res.status(400).json(response);
+            });
+    });
+
 router.route('/getAllCourses')
     .get((req, res) => {
         courseCtrl.getAllCourses()

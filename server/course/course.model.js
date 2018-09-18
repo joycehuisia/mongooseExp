@@ -77,7 +77,7 @@ CourseSchema.statics = {
     },
 
     getCourseById(courseId) {
-        return this.find({
+        return this.findOne({
             _id: courseId
         }).exec();
     },

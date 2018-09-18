@@ -43,6 +43,21 @@ StudentSchema.statics = {
         });
 
         return student.save();
+    },
+
+    addStudentsToCourse(studentList, courseId) {
+        let query = {
+            _id: {
+                $in: studentList
+            }
+        }, params = {
+            $push: {
+                courses: [{
+                    id: courseObject.id
+                }]
+            }
+        };
+        return this.update(query, params);
     }
 }
 
